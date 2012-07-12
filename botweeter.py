@@ -3,6 +3,16 @@ import socket
 import twitter
 import sys
 
+def twitter2irc(intext):
+	if intext.startswith('/me '):
+		return '\x01action' + intext[3:] + '\x01'
+	return intext
+
+def irc2twitter(intext):
+	if intext.startswith('\x01action '):
+		return '/me' + intext[7:-1]
+	return intext
+
 def init(host, port, consumer_key, consumer_secret, access_token_key,
         access_token_secret):
     api = twitter.Api(consumer_key, consumer_secret,
