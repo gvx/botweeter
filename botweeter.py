@@ -20,7 +20,7 @@ def init(host, port, consumer_key, consumer_secret, access_token_key,
         access_token_secret):
     api = twitter.Api(consumer_key, consumer_secret,
             access_token_key, access_token_secret)
-    print api.VerifyCredentials()
+    name = api.VerifyCredentials().screen_name
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((host, port))
     s.listen(1)
@@ -28,7 +28,9 @@ def init(host, port, consumer_key, consumer_secret, access_token_key,
     conn.settimeout(0.0)
     buff = ''
     nick = 'bot'
-    last_mention = api.GetMentions()[-1].id #skip the backlog
+    mentions = api.GetMentions()
+    if mentions:
+        last_mention = mentions[0].id #skip the backlog
     while True:
         try:
             buff += conn.recv(1024)
@@ -46,7 +48,7 @@ def init(host, port, consumer_key, consumer_secret, access_token_key,
                         name, rest = rest.split(':', 1)
                         api.PostUpdates(u'@%s %s' % (name.strip(), irc2twitter(rest)))
         for status in api.GetMentions(last_mention):
-            conn.send((u':%s PRIVMSG %s :%s%s' % (status.user.name, nick, twitter2irc(status.text[len(status.in_reply_to_screen_name)+3:]), NEWLINE)).encode('utf-8'))
+            conn.send((u':%s PRIVMSG %s :%s%s' % (status.user.name, nick, twitter2irc(status.text[len(name)+2:]), NEWLINE)).encode('utf-8'))
             last_mention = status.id
     conn.close()
 
