@@ -25,7 +25,7 @@ def init(host, port, consumer_key, consumer_secret, access_token_key,
     s.bind((host, port))
     s.listen(1)
     conn, addr = s.accept()
-    conn.settimeout(0.0)
+    conn.settimeout(10.0)
     buff = ''
     nick = 'bot'
     mentions = api.GetMentions()
