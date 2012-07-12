@@ -3,6 +3,7 @@ import socket
 import twitter
 import sys
 import StringIO
+import time
 
 def twitter2irc(intext):
     if intext.startswith('/me '):
@@ -29,6 +30,7 @@ def init(host, port, consumer_key, consumer_secret, access_token_key,
     buff = ''
     nick = 'bot'
     mentions = api.GetMentions()
+    last_api_call = time.time()
     if mentions:
         last_mention = mentions[0].id #skip the backlog
     while True:
@@ -47,9 +49,11 @@ def init(host, port, consumer_key, consumer_secret, access_token_key,
                     elif cmd == 'PRIVMSG':
                         name, rest = rest.split(':', 1)
                         api.PostUpdates(u'@%s %s' % (name.strip(), irc2twitter(rest)))
-        for status in api.GetMentions(last_mention):
-            conn.send((u':%s!~twitter PRIVMSG %s :%s%s' % (status.user.name, nick, twitter2irc(status.text[len(name)+2:]), NEWLINE)).encode('utf-8'))
-            last_mention = status.id
+        if time.time() > last_api_call + 60: #only once a minute
+            last_api_call = time.time()
+            for status in api.GetMentions(last_mention):
+                conn.send((u':%s!~twitter PRIVMSG %s :%s%s' % (status.user.name, nick, twitter2irc(status.text[len(name)+2:]), NEWLINE)).encode('utf-8'))
+                last_mention = status.id
     conn.close()
 
 
