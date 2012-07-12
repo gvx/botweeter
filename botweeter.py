@@ -48,7 +48,7 @@ def init(host, port, consumer_key, consumer_secret, access_token_key,
                         name, rest = rest.split(':', 1)
                         api.PostUpdates(u'@%s %s' % (name.strip(), irc2twitter(rest)))
         for status in api.GetMentions(last_mention):
-            conn.send((u':%s PRIVMSG %s :%s%s' % (status.user.name, nick, twitter2irc(status.text[len(name)+2:]), NEWLINE)).encode('utf-8'))
+            conn.send((u':%s!~twitter PRIVMSG %s :%s%s' % (status.user.name, nick, twitter2irc(status.text[len(name)+2:]), NEWLINE)).encode('utf-8'))
             last_mention = status.id
     conn.close()
 
