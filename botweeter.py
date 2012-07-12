@@ -28,7 +28,7 @@ def init(host, port, consumer_key, consumer_secret, access_token_key,
     conn.settimeout(0.0)
     buff = ''
     nick = 'bot'
-    last_mention = None
+    last_mention = api.GetMentions()[-1].id #skip the backlog
     while True:
         try:
             buff += conn.recv(1024)
@@ -44,9 +44,9 @@ def init(host, port, consumer_key, consumer_secret, access_token_key,
                         nick = rest
                     elif cmd == 'PRIVMSG':
                         name, rest = rest.split(':', 1)
-                        api.PostUpdates('@%s %s' % (name.strip(), irc2twitter(rest)))
+                        api.PostUpdates(u'@%s %s' % (name.strip(), irc2twitter(rest)))
         for status in api.GetMentions(last_mention):
-            conn.send(':%s PRIVMSG %s :%s%s' % (status.user.name, nick, twitter2irc(status.text[len(status.in_reply_to_screen_name)+3:]), NEWLINE))
+            conn.send((u':%s PRIVMSG %s :%s%s' % (status.user.name, nick, twitter2irc(status.text[len(status.in_reply_to_screen_name)+3:]), NEWLINE)).encode('utf-8'))
             last_mention = status.id
     conn.close()
 
