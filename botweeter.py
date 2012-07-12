@@ -32,7 +32,7 @@ def init(host, port, consumer_key, consumer_secret, access_token_key,
     while True:
         try:
             buff += conn.recv(1024)
-        except socket.timeout:
+        except socket.error:
             pass
         else:
             if NEWLINE in buff:
